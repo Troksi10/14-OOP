@@ -250,17 +250,17 @@ darko.init('Darko', 2003);
 darko.calcAge();
 
 const StudentProto = Object.create(PersonProto);
-StudentProto.init = function(firstName,birthYear,course){
-  PersonProto.init.call(this,firstName,birthYear)
+StudentProto.init = function (firstName, birthYear, course) {
+  PersonProto.init.call(this, firstName, birthYear);
   this.course = course;
-}
+};
 
-StudentProto.introduce = function(){
+StudentProto.introduce = function () {
   console.log(`My name is ${this.firstName} and I study ${this.course}`);
-}
+};
 
 const violeta = Object.create(StudentProto);
-violeta.init('Violeta',1985,'Software Tester');
+violeta.init('Violeta', 1985, 'Software Tester');
 violeta.introduce();
 violeta.calcAge();
 
@@ -291,6 +291,7 @@ class CarCl {
   brake() {
     this.speed -= 5;
     console.log(`${this.make} is going at ${this.speed} km/h`);
+    return this;
   }
 
   get speedUs() {
@@ -309,6 +310,54 @@ ford.accelerate();
 ford.brake();
 ford.speedUs = 50;
 console.log(ford);
+
+///////////////////////////////////////
+// Coding Challenge #4
+
+/* 
+1. Re-create challenge #3, but this time using ES6 classes: create an 'EVCl' child class of the 'CarCl' class
+2. Make the 'charge' property private;
+3. Implement the ability to chain the 'accelerate' and 'chargeBattery' methods of this class, and also update the 'brake' method in the 'CarCl' class. They experiment with chining!
+
+DATA CAR 1: 'Rivian' going at 120 km/h, with a charge of 23%
+
+*/
+
+class EVCl extends CarCl {
+  #charge;
+  constructor(make, speed, charge) {
+    super(make, speed);
+    this.#charge = charge;
+  }
+
+  chargeBattery(chargeTo) {
+    this.#charge = chargeTo;
+    return this;
+  }
+
+  accelerate() {
+    this.speed += 20;
+    this.#charge--;
+    console.log(
+      `${this.make} is going at ${this.speed} km/h, with a charge of ${
+        this.#charge
+      }`
+    );
+    return this;
+  }
+}
+
+const rivian = new EVCl('Rivian', 120, 23);
+console.log(rivian);
+rivian
+  .accelerate()
+  .accelerate()
+  .accelerate()
+  .brake()
+  .chargeBattery(50)
+  .accelerate();
+
+ console.log(rivian.speedUs);
 
 ///////////////////////////////////////
 // Inheritance Between "Classes": Constructor Functions
@@ -373,31 +422,104 @@ DATA CAR 1: 'Tesla' going at 120 km/h, with a charge of 23%
 //     console.log(`${this.make} is going at ${this.speed} km/h`);
 //   };
 
-const EV = function (make, speed, charge) {
-  Car.call(this, make, speed);
-  this.charge = charge;
-};
+// const EV = function (make, speed, charge) {
+//   Car.call(this, make, speed);
+//   this.charge = charge;
+// };
 
-// Link the prototypes
-EV.prototype = Object.create(Car.prototype);
+// // Link the prototypes
+// EV.prototype = Object.create(Car.prototype);
 
-EV.prototype.chargeBattery = function (chargeTo) {
-  this.charge = chargeTo;
-};
+// EV.prototype.chargeBattery = function (chargeTo) {
+//   this.charge = chargeTo;
+// };
 
-EV.prototype.accelerate = function () {
-  this.speed += 20;
-  this.charge--;
-  console.log(
-    `${this.make} is going at ${this.speed} km/h, with a charge of ${this.charge}`
-  );
-};
+// EV.prototype.accelerate = function () {
+//   this.speed += 20;
+//   this.charge--;
+//   console.log(
+//     `${this.make} is going at ${this.speed} km/h, with a charge of ${this.charge}`
+//   );
+// };
 
-const tesla = new EV('Tesla', 120, 23);
-tesla.chargeBattery(90);
-console.log(tesla);
-tesla.brake();
-tesla.accelerate();
+// const tesla = new EV('Tesla', 120, 23);
+// tesla.chargeBattery(90);
+// console.log(tesla);
+// tesla.brake();
+// tesla.accelerate();
 
+///////////////////////////////////////
+// Encapsulation: Protected Properties and Methods
+// Encapsulation: Private Class Fields and Methods
 
+class Account {
+  // 1. Public fields (instances)
+  locale = navigator.language;
 
+  // 2.Private fields (instances)
+
+  #movements = [];
+  #pin;
+
+  constructor(owner, currency, pin) {
+    this.owner = owner;
+    this.currency = currency;
+    this.#pin = pin;
+    // this._movements = [];
+    // this.locale = navigator.language;
+
+    console.log(`Thanks for opening an account,${owner}.`);
+  }
+
+  // 3. Public methods
+  // Public interface
+
+  getMovements() {
+    return this.#movements;
+  }
+
+  deposit(val) {
+    this.#movements.push(val);
+    return this;
+  }
+
+  withdraw(val) {
+    this.deposit(-val);
+    return this;
+  }
+
+  requestLoan(val) {
+    if (this._aproveLoan(val)) {
+      this.deposit(val);
+      console.log('Loan approved');
+    } else {
+      console.log('Loan rejected');
+    }
+    return this;
+  }
+
+  static helper() {
+    console.log('Helper');
+  }
+
+  // 4. Private methods
+  _aproveLoan(val) {
+    return true;
+  }
+}
+
+const acc1 = new Account('Ilija', 'EUR', 1111);
+
+// acc1._movements.push(250);
+// acc1._movements.push(-140);
+acc1.deposit(250);
+acc1.withdraw(140);
+acc1.requestLoan(1000);
+console.log(acc1.getMovements());
+console.log(acc1);
+Account.helper();
+
+// Chaining
+
+acc1.deposit(300).deposit(500).withdraw(50).requestLoan(25000).withdraw(400);
+console.log(acc1.getMovements());
